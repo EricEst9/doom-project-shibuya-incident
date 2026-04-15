@@ -1,0 +1,86 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fjalla+One&family=Fruktur&display=swap");
+
+body {
+  text-align: center;
+  width: 1200px;
+  margin: 0 auto;
+  background-image: url(../images/1142818.jpeg);
+}
+
+body h1 {
+  font-size: 60px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 2px #464646;
+  ;
+}
+
+body button {
+  font-size: 20px;
+  background-color: black;
+  color: #fff;
+  padding: 10px 20px;
+  border: 0;
+  box-shadow: 0;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  box-shadow: 2px 2px 2px #464646;
+}
+
+.container-score {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  color: whitesmoke;
+  font-family: "Bebas Neue", cursive;
+  font-size: 2rem;
+  text-shadow: 2px 2px 2px #464646;
+  margin-left: 14%;
+}
+
+#SCORE {
+  font-size: 4rem;
+  display: flex;
+  flex-direction: row;
+  padding: 20px;
+  flex-wrap: nowrap;
+  justify-content: center;
+  color: whitesmoke;
+  font-family: "Fjalla One", sans-serif;
+  text-shadow: 5px 5px 5px #464646;
+}
+
+#clock {
+  font-size: 3rem;
+  display: flex;
+  flex-direction: row;
+  padding: 20px;
+  color: whitesmoke;
+  font-family: "Fjalla One", sans-serif;
+  text-shadow: 5px 5px 5px #464646;
+}
+
+.container {
+  margin-top: 0px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: stretch;
+  justify-content: center;
+  align-items: center;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+}
+
+#canvas {
+  border: groove 1px rgb(255, 255, 255);
+  background: url(../images/scorched_earth.png);
+  image-resolution: center;
+  box-shadow: 10px 10px 10px #464646;
+}
+
+.show {
+  display: block;
+}
+
+.hide {
+  display: none;
+}
