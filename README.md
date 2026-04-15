@@ -6,7 +6,7 @@
 
 ## Introduction
 
-For this project, despite being able to use libraries, we used Canvas, in order to have a better application of the learned code, and also to improve it. To do this, we created [This game](https://4epic.github.io/doom-project-shibuya-incident/), in order to visually see what the Canvas format is capable of.
+For this project, despite being able to use libraries, we used Canvas, in order to have a better application of the learned code, and also to improve it. To do this, we created [This game](https://ericest9.github.io/Project-1-Shibuya-incident/), in order to visually see what the Canvas format is capable of.
 
 On this occasion, we thought about implementing a simple game with different logics that was updated following the player's value with the collision value. Finally, this idea was discarded, due to its apparent simplicity - Considering what we have seen, it was not going to be very simple either -, and a new "shoot'em up 2D" format was considered.
 
