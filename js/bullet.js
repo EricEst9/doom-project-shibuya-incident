@@ -28,6 +28,7 @@ class Bullet {
 
     this.imageEn = new Image();
     this.imageEn.src = "images/bullet.png";
+    this.isEnemy = false;
     this.alive = true;
   }
 
@@ -37,7 +38,14 @@ class Bullet {
   
   draw() {
     if (this.alive) {
-      this.ctx.drawImage(this.imageEn, this.x, this.y, this.size, this.size);
+      if (this.isEnemy) {
+        this.ctx.save();
+        this.ctx.filter = 'hue-rotate(180deg)';
+        this.ctx.drawImage(this.imageEn, this.x, this.y, this.size, this.size);
+        this.ctx.restore();
+      } else {
+        this.ctx.drawImage(this.imageEn, this.x, this.y, this.size, this.size);
+      }
     }
   }
 

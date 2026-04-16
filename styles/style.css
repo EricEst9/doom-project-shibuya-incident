@@ -2,16 +2,23 @@
 
 body {
   text-align: center;
-  width: 1200px;
-  margin: 0 auto;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-image: url(../images/1142818.jpeg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 body h1 {
   font-size: 60px;
   text-transform: uppercase;
   text-shadow: 2px 2px 2px #464646;
-  ;
 }
 
 body button {
@@ -60,14 +67,17 @@ body button {
 }
 
 .container {
-  margin-top: 0px;
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
-  align-content: stretch;
-  justify-content: center;
   align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 1200px;
+  padding: max(20px, 4vh) 10px 40px 10px;
+  box-sizing: border-box;
   font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  margin: 0 auto;
+  flex-grow: 1;
 }
 
 #canvas {
@@ -75,6 +85,147 @@ body button {
   background: url(../images/scorched_earth.png);
   image-resolution: center;
   box-shadow: 10px 10px 10px #464646;
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
+  aspect-ratio: 1000 / 600;
+  touch-action: none; /* prevent scroll when touching canvas */
+}
+
+/* RESPONSIVE UI */
+.responsive-img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.responsive-img-logo {
+  max-width: 100%;
+  height: auto;
+}
+
+.banner-img {
+  width: 80%;
+  max-width: 600px;
+}
+
+.responsive-container {
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.buttons-row {
+  display: flex; 
+  gap: 10px; 
+  justify-content: center; 
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+#game-ui-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1000px;
+  align-items: center;
+  margin: 10px auto;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+#game-ui-header #clock, #game-ui-header .container-score {
+  position: static;
+  margin: 0;
+  padding: 5px;
+  font-size: 1.5rem;
+}
+
+#game-ui-header #clock { font-size: 2rem; }
+#game-ui-header #SCORE { font-size: 2rem; padding: 5px; }
+.container-score { font-size: 1.5rem; }
+
+#game-board {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.game-footer-ui {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+/* TOUCH CONTROLS */
+#touch-controls {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+.dpad-row {
+  display: flex;
+  justify-content: space-between;
+  width: 150px;
+}
+
+.dpad-btn {
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  background: rgba(255,255,255,0.4);
+  color: black;
+  border: 2px solid white;
+  border-radius: 5px;
+  user-select: none;
+  font-family: monospace;
+  margin: 2px;
+}
+
+.dpad-btn:active {
+  background: rgba(255,255,255,0.8);
+}
+
+/* AUDIO CONTROLS */
+.audio-controls {
+  background: rgba(0,0,0,0.8);
+  padding: 15px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.audio-label {
+  color: #fff;
+  font-family: monospace;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.audio-volume-label {
+  font-size: 1rem;
+}
+
+.audio-slider {
+  width: 100%;
+  margin-top: 10px;
+}
+
+@media (min-width: 1024px) {
+  .hide-desktop {
+    display: none !important;
+  }
 }
 
 .show {

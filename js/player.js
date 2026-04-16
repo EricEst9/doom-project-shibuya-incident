@@ -11,6 +11,9 @@ class Player {
     this.direction = null;
     this.imagePj = new Image();
     this.imagePj.src = "images/spriteGojo3.png";
+
+    this.immunityTimer = 0;
+    this.rapidFireTimer = 0;
   }
 
   update(deltaTime) {
@@ -28,6 +31,9 @@ class Player {
     if (this.direction == "right") {
       this.x += this.moveSpeed * deltaTime;
     }
+
+    if (this.immunityTimer > 0) this.immunityTimer -= deltaTime;
+    if (this.rapidFireTimer > 0) this.rapidFireTimer -= deltaTime;
 
     this.checkScreen();
   }
@@ -50,7 +56,14 @@ class Player {
   }
 
   draw() {
+    if (this.immunityTimer > 0) {
+      this.ctx.save();
+      this.ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 100) * 0.5;
+    }
     this.ctx.drawImage(this.imagePj, this.x, this.y, this.size, this.size);
+    if (this.immunityTimer > 0) {
+      this.ctx.restore();
+    }
   }
 
   didCollide(obstacle) {
