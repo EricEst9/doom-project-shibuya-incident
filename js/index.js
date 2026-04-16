@@ -14,6 +14,11 @@ const buildSplashScreen = () => {
   <div class= "pointer"> 
   <img src="./images/instructions.png" alt="" style="width:50%;" />
   <br />
+    <div style="margin-bottom: 20px;">
+    <label style="color: white; font-family: monospace; font-size: 1.2rem; cursor: pointer;">
+      <input type="checkbox" id="music-toggle" checked /> Activar Música On/Off
+    </label>
+  </div>
   `);
   const startButton = document.getElementById("start-button");
   startButton.addEventListener("click", buildGameScreen);
@@ -21,6 +26,9 @@ const buildSplashScreen = () => {
 
 // Second Screen => Game Screen
 const buildGameScreen = () => {
+  const musicToggle = document.getElementById("music-toggle");
+  const musicEnabled = musicToggle ? musicToggle.checked : true;
+
   buildDom(`
   <section id="clock">
         <span>SURVIVE:&nbsp;</span>
@@ -36,10 +44,13 @@ const buildGameScreen = () => {
   <button id="end-button">End Game</button>
   `);
   const endButton = document.getElementById("end-button");
-  endButton.addEventListener("click", buildGameOver);
+  endButton.addEventListener("click", () => {
+    if (window.currentGame) window.currentGame.terminate();
+    buildGameOver();
+  });
 
-  const game = new Game();
-  game.start();
+  window.currentGame = new Game(musicEnabled);
+  window.currentGame.start();
 };
 
 // Third Screen => Game Over

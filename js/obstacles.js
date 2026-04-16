@@ -20,45 +20,52 @@ class Obstacle {
   }
 
   calculateInits() {
-    if (this.direction == 0) { // up
-      this.x = Math.random() * this.canvas.width; // random
+    // Escala de velocidad para deltaTime: type 0 = ~60px/s, type 1 = ~150px/s
+    const spd = this.type == 0 ? 60 : 150;
+
+    if (this.direction == 0) { // up (spawns bot, moves up)
+      this.x = Math.random() * this.canvas.width;
       this.y = this.canvas.height + this.size;
       this.speedX = 0;
-      this.speedY = this.type == 0 ? -1 : -2.5;
+      this.speedY = -spd;
     }
     if (this.direction == 1) { // down
-      this.x = Math.random() * this.canvas.width; // random
-      this.y = 0;
+      this.x = Math.random() * this.canvas.width;
+      this.y = -this.size;
       this.speedX = 0;
-      this.speedY = this.type == 0 ? 1 : 2.5;
+      this.speedY = spd;
     }
 
-    if (this.direction == 2) { // left
+    if (this.direction == 2) { // left (spawns left, moves right) - The original logic commented left but spawned x=-size moving right (+spd)
       this.x = -this.size;
-      this.y = Math.random() * this.canvas.height; // random
-      this.speedX = this.type == 0 ? 1 : 2.5;
+      this.y = Math.random() * this.canvas.height;
+      this.speedX = spd;
       this.speedY = 0;
     }
 
     if (this.direction == 3) { // right
       this.x = this.canvas.width;
-      this.y = Math.random() * this.canvas.height; // random
-      this.speedX = this.type == 0 ? -1 : -2.5;
+      this.y = Math.random() * this.canvas.height;
+      this.speedX = -spd;
       this.speedY = 0;
     }
   }
 
   draw() {
     if (this.alive) {
-      // We will first draw squares
-      this.ctx.fillStyle = this.color;
-      // this.ctx.fillRect(this.x, this.y, this.size, this.size);
       this.ctx.drawImage(this.imageEn, this.x, this.y, this.size, this.size);
     }
   }
 
-  move() {
-    this.x += this.speedX;
-    this.y += this.speedY;
+  move(deltaTime) {
+    if (!deltaTime) return;
+    this.x += this.speedX * deltaTime;
+    this.y += this.speedY * deltaTime;
+
+    // Remove if way off screen
+    if (this.x < -200 || this.x > this.canvas.width + 200 ||
+        this.y < -200 || this.y > this.canvas.height + 200) {
+        this.kill();
+    }
   }
 }

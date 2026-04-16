@@ -1,17 +1,31 @@
-
-
 class Bullet {
-  constructor(canvas, ctx, playerX, playerY, clientX, clientY) {
+  constructor(canvas, ctx, playerX, playerY, targetX, targetY) {
     this.ctx = ctx;
     this.canvas = canvas;
-    this.x = playerX;
-    this.y = playerY;
-    // https://gist.github.com/conorbuck/2606166
-    this.angleRadians = Math.atan2(clientY - playerY, clientX - playerX) * 180 / Math.PI;
-    this.velocity = 0.25;
-    this.vx = (clientX - playerX).map(-550, 1000, -50, 50) * this.velocity;
-    this.vy = (clientY - playerY).map(-100, 600, -50, 50) * this.velocity;
     this.size = 30;
+    
+    // Player visual center approx
+    const pCenterX = playerX + 30; // player.size/2
+    const pCenterY = playerY + 30;
+
+    this.x = pCenterX - this.size/2;
+    this.y = pCenterY - this.size/2;
+
+    const dx = targetX - pCenterX;
+    const dy = targetY - pCenterY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Normalize dir
+    const dirX = distance > 0 ? dx / distance : 0;
+    const dirY = distance > 0 ? dy / distance : 0;
+
+    // Base speed + extra speed based on distance (maintains original mechanics)
+    // Adjust scale so it behaves uniformly
+    const speed = 200 + distance * 1.5; // pixels per second
+
+    this.vx = dirX * speed;
+    this.vy = dirY * speed;
+
     this.imageEn = new Image();
     this.imageEn.src = "images/bullet.png";
     this.alive = true;
@@ -23,34 +37,32 @@ class Bullet {
   
   draw() {
     if (this.alive) {
-      this.ctx.fillStyle = this.color;
-      this.ctx.drawImage(this.imageEn, this.x +15 , this.y +20, this.size, this.size);
+      this.ctx.drawImage(this.imageEn, this.x, this.y, this.size, this.size);
     }
   }
 
-  move() {
-    this.x += this.vx;
-    this.y += this.vy;
+  move(deltaTime) {
+    if (!deltaTime) return;
+    this.x += this.vx * deltaTime;
+    this.y += this.vy * deltaTime;
+
+    // If out of canvas, kill it so it doesn't pile up endlessly
+    if (this.x < -this.size || this.x > this.canvas.width + this.size ||
+        this.y < -this.size || this.y > this.canvas.height + this.size) {
+        this.kill();
+    }
   }
 
   didCollide(obstacle) {
     if (
       this.x + this.size >= obstacle.x &&
-      this.y + this.size > obstacle.y &&
-      this.y < obstacle.y + obstacle.size &&
       this.x <= obstacle.x + obstacle.size &&
-      this.y + this.size > obstacle.y &&
-      this.y < obstacle.y + obstacle.size
+      this.y + this.size >= obstacle.y &&
+      this.y <= obstacle.y + obstacle.size
     ) {
       return obstacle.id;
     } else {
       return false;
     }
   }
-
-}
-
-// https://gist.github.com/xposedbones/75ebaef3c10060a3ee3b246166caab56
-Number.prototype.map = function (in_min, in_max, out_min, out_max) {
-  return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
+}

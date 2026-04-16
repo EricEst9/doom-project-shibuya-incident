@@ -7,28 +7,26 @@ class Player {
     this.size = 60;
     this.x = canvas.width / 2 - this.size / 2;
     this.y = canvas.height / 2 - this.size / 2;
-    this.move = 5;
-    this.canUp = true;
-    this.canDown = true;
-    this.canLeft = true;
-    this.canRight = true;
+    this.moveSpeed = 300; // pixels per second
     this.direction = null;
     this.imagePj = new Image();
     this.imagePj.src = "images/spriteGojo3.png";
   }
 
-  update() {
-    if (this.canMoveUp && this.direction == "up") {
-      this.y -= this.move;
+  update(deltaTime) {
+    if (!deltaTime) return;
+
+    if (this.direction == "up") {
+      this.y -= this.moveSpeed * deltaTime;
     }
-    if (this.canMoveDown && this.direction == "down") {
-      this.y += this.move;
+    if (this.direction == "down") {
+      this.y += this.moveSpeed * deltaTime;
     }
-    if (this.canMoveLeft && this.direction == "left") {
-      this.x -= this.move;
+    if (this.direction == "left") {
+      this.x -= this.moveSpeed * deltaTime;
     }
-    if (this.canMoveRight && this.direction == "right") {
-      this.x += this.move;
+    if (this.direction == "right") {
+      this.x += this.moveSpeed * deltaTime;
     }
 
     this.checkScreen();
@@ -43,27 +41,24 @@ class Player {
     }
   }
 
-  // Check if the player is out of the screen / canvas
+  // Check if the player is out of the screen / canvas and clamp
   checkScreen() {
-    this.canMoveDown = this.y >= this.canvas.height - this.size ? false : true;
-    this.canMoveUp = this.y <= 0 ? false : true;
-    this.canMoveLeft = this.x <= 0 ? false : true;
-    this.canMoveRight = this.x >= this.canvas.width - this.size ? false : true;
+    if (this.y < 0) this.y = 0;
+    if (this.y > this.canvas.height - this.size) this.y = this.canvas.height - this.size;
+    if (this.x < 0) this.x = 0;
+    if (this.x > this.canvas.width - this.size) this.x = this.canvas.width - this.size;
   }
 
   draw() {
     this.ctx.drawImage(this.imagePj, this.x, this.y, this.size, this.size);
-    this.ctx.fillStyle = "#000000";
   }
 
   didCollide(obstacle) {
     if (
       this.x + this.size >= obstacle.x &&
-      this.y + this.size > obstacle.y &&
-      this.y < obstacle.y + obstacle.size &&
       this.x <= obstacle.x + obstacle.size &&
-      this.y + this.size > obstacle.y &&
-      this.y < obstacle.y + obstacle.size
+      this.y + this.size >= obstacle.y &&
+      this.y <= obstacle.y + obstacle.size
     ) {
       return true;
     } else {

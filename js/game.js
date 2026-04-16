@@ -1,7 +1,7 @@
 "use strict";
 
 class Game {
-  constructor() {
+  constructor(musicEnabled = true) {
     this.canvas = null;
     this.ctx = null;
     this.obstacles = [];
@@ -10,7 +10,11 @@ class Game {
     this.score = 0;
     this.finalScore = 0;
     this.timer = 60;
-    this.clockId = null;
+    this.accumulatedTime = 0;
+    this.animationId = null;
+    this.lastTime = 0;
+    this.musicEnabled = musicEnabled;
+
     this.musicIntro = new Audio();
     this.musicIntro.src = "music/musicainicio.mp3";
     this.musicCanvas = new Audio();
@@ -26,32 +30,33 @@ class Game {
   }
 
   start() {
-    // Append canvas to the DOM, create a Player and start the Canvas loop
-    // Save reference to canvas and Create ctx
     this.canvas = document.querySelector("canvas");
     this.ctx = canvas.getContext("2d");
 
-    this.musicCanvas.play();
+    if (this.musicEnabled) {
+      this.musicCanvas.play();
+    }
 
-    // Handle Bullets
     this.bullets = [];
     this.handleMouseDown = (event) => {
+      const rect = this.canvas.getBoundingClientRect();
+      const targetX = event.clientX - rect.left;
+      const targetY = event.clientY - rect.top;
+
       let bullet = new Bullet(
         this.canvas,
         this.ctx,
         this.player.x,
         this.player.y,
-        event.clientX,
-        event.clientY
+        targetX,
+        targetY
       );
       this.bullets.push(bullet);
-      this.musicShot.cloneNode().play();
+      if (this.musicEnabled) this.musicShot.cloneNode().play();
     };
 
-    // Create a new player for the current game
-    this.player = new Player(this.canvas, 3);
+    this.player = new Player(this.canvas);
 
-    // Add event listener for moving the player
     this.handleKeyboard = (event) => {
       if (event.type === "keydown") {
         if (event.code === "ArrowUp" || event.code === "KeyW") {
@@ -62,37 +67,55 @@ class Game {
           this.player.setDirection("left");
         } else if (event.code === "ArrowRight" || event.code === "KeyD") {
           this.player.setDirection("right");
-        } else if (event.type === "keyup") {
-          this.player.setDirection(null);
         }
-      } else {
+      } else if (event.type === "keyup") {
         this.player.setDirection(null);
       }
     };
 
-    // Any function provided to eventListener
     document.body.addEventListener("keydown", this.handleKeyboard);
     document.body.addEventListener("keyup", this.handleKeyboard);
     this.canvas.addEventListener("mousedown", this.handleMouseDown);
 
-    // Start the canvas requestAnimationFrame loop
-    this.clockId = setInterval(() => (this.timer -= 1), 1000);
+    this.lastTime = performance.now();
     this.startLoop();
   }
 
+  terminate() {
+      this.gameIsOver = true;
+      if (this.animationId) cancelAnimationFrame(this.animationId);
+      this.musicCanvas.pause();
+      document.body.removeEventListener("keydown", this.handleKeyboard);
+      document.body.removeEventListener("keyup", this.handleKeyboard);
+      this.canvas.removeEventListener("mousedown", this.handleMouseDown);
+  }
+
   printTime() {
-    const time = ("0" + this.timer).slice(-2);
+    const time = ("0" + Math.max(0, Math.floor(this.timer))).slice(-2);
     document.getElementById("secDec").innerText = time[0];
     document.getElementById("secUni").innerText = time[1];
   }
 
   startLoop() {
-    const loop = () => {
-      // We create the obstacles with random y
-      let obstaclesCounter = 0;
-      if (Math.random() > 0.95) {
+    const loop = (timestamp) => {
+      let deltaTime = (timestamp - this.lastTime) / 1000;
+      this.lastTime = timestamp;
+
+      // Safety cap for deltaTime if we tab out
+      if (deltaTime > 0.1) deltaTime = 0.1;
+
+      this.accumulatedTime += deltaTime;
+      if (this.accumulatedTime >= 1) {
+          this.timer -= 1;
+          this.accumulatedTime -= 1;
+      }
+
+      // We create the obstacles
+      // The probability should be adjusted to deltaTime so it behaves uniformly
+      let spawnRate = 0.5 * deltaTime; // Approx half chance per second
+      if (Math.random() < spawnRate) {
         let newObstacle = new Obstacle(
-          obstaclesCounter,
+          Date.now() + Math.random(),
           this.ctx,
           this.canvas,
           Math.floor(Math.random() * 4),
@@ -102,57 +125,42 @@ class Game {
         this.obstacles.push(newObstacle);
       }
 
-      // 1. UPDATE THE STATE OF PLAYER AND WE MOVE THE OBSTACLES
-      this.player.update();
-      this.obstacles.forEach((obstacle) => {
-        obstacle.move();
-      });
-      this.bullets.forEach((bullet) => {
-        bullet.move();
-      });
+      // UPDATE ENTITIES
+      this.player.update(deltaTime);
+      this.obstacles.forEach((obstacle) => obstacle.move(deltaTime));
+      this.bullets.forEach((bullet) => bullet.move(deltaTime));
 
-      // this.player.checkBorder();
       this.checkCollisions();
 
-      // 2. CLEAR THE CANVAS
+      // GARBAGE COLLECTION
+      this.obstacles = this.obstacles.filter(o => o.alive);
+      this.bullets = this.bullets.filter(b => b.alive);
+
+      // DRAW
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-      // 3. UPDATE THE CANVAS
-      // Draw the player
-      this.player.update();
       this.player.draw();
-      // Draw the enemies
-      this.obstacles.forEach((obstacle) => {
-        obstacle.draw();
-      });
-
-      // Draw the bullets
-      this.bullets.forEach((bullet) => {
-        bullet.draw();
-      });
+      this.obstacles.forEach((obstacle) => obstacle.draw());
+      this.bullets.forEach((bullet) => bullet.draw());
 
       this.printTime();
 
-      // 4. TERMINATE LOOP IF YOU WIN OR IF GAME OVER
+      // GAME STATE
       if (!this.gameIsOver && this.timer > 0) {
-        window.requestAnimationFrame(loop);
-      } else if (!this.gameIsOver && this.timer === 0) {
+        this.animationId = window.requestAnimationFrame(loop);
+      } else if (!this.gameIsOver && this.timer <= 0) {
+        this.terminate();
         buildYouWin();
-        this.musicCanvas.pause();
         this.finalScore = this.score;
         document.querySelector("#SCORE1").innerText = this.finalScore;
-        this.musicWin.play();
+        if (this.musicEnabled) this.musicWin.play();
       } else {
+        this.terminate();
         buildGameOver();
-        this.musicCanvas.pause();
-        this.musicLose.play();
+        if (this.musicEnabled) this.musicLose.play();
       }
     };
 
-    // As loop function will be continuously invoked by
-    // the `window` object- `window.requestAnimationFrame(loop)`
-    // we need to `start an infinitive loop` till the game is over
-    window.requestAnimationFrame(loop);
+    this.animationId = window.requestAnimationFrame(loop);
   }
 
   checkCollisions() {
@@ -161,14 +169,10 @@ class Game {
         this.gameIsOver = true;
       }
       this.bullets.forEach((bullet) => {
-        if (
-          bullet.didCollide(obstacle) !== false &&
-          obstacle.alive &&
-          bullet.alive
-        ) {
+        if (bullet.didCollide(obstacle) && obstacle.alive && bullet.alive) {
           obstacle.kill();
           bullet.kill();
-          this.musicDeath.cloneNode().play();
+          if (this.musicEnabled) this.musicDeath.cloneNode().play();
           this.score += 25;
           document.querySelector("#score").innerText = this.score;
         }
